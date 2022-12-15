@@ -31,12 +31,6 @@ variable "bastion_volume_size" {
   default     = 10
 }
 
-variable "bastion_security_group_name" {
-  description = "The name of the security group"
-  type        = string
-  default     = "terraform-my-instance"
-}
-
 variable "ssh_server_port" {
   description = "The port the server will use for HTTP requests"
   type        = number

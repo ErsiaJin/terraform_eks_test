@@ -15,15 +15,25 @@ data "terraform_remote_state" "environment" {
   }
 }
 
+data "terraform_remote_state" "eks" {
+  backend = "local"
+
+  config = {
+    path = "../2.eks/terraform.tfstate"
+  }
+}
+
 locals {
-  name = "dev-ihjin"
-  region = "ap-northeast-2"
-  mypc-external-cidr = "${chomp(data.http.mypc-external-ip.response_body)}/32"
-  ec2_subnet_id      = "${data.terraform_remote_state.environment.outputs.public_subnets[1]}"
+  name                = "dev-ihjin"
+  region              = "ap-northeast-2"
+  mypc-external-cidr  = "${chomp(data.http.mypc-external-ip.response_body)}/32"
+  public_subnet_id    = "${data.terraform_remote_state.environment.outputs.public_subnets[1]}"
+  config_map_aws_auth = "${data.terraform_remote_state.eks.outputs.config_map_aws_auth}"
+  kubeconfig          = "${data.terraform_remote_state.eks.outputs.kubeconfig}"
 }
 
 resource "aws_security_group" "bastion_security_group" {
-  name          = "${var.bastion_security_group_name}"
+  name          = "${local.name}-bastion-ec2-sg"
   vpc_id        = "${data.terraform_remote_state.environment.outputs.vpc_id}"
 
   ingress {
@@ -48,11 +58,15 @@ resource "aws_instance" "bastion_ec2" {
   ami                     = "${data.aws_ami.bastion_ami.id}"
   instance_type           = "${var.bastion_instance_type}"
   vpc_security_group_ids  = [aws_security_group.bastion_security_group.id]
-  subnet_id               = "${local.ec2_subnet_id}"
+  subnet_id               = "${local.public_subnet_id}"
   key_name                = "${var.bastion_key_name}"
   disable_api_termination = false
 
-  user_data = "${templatefile("userdata-web.tftpl", {server_port = 5000})}"
+  user_data = "${templatefile("userdata-eks.tftpl", 
+                  {hostname            = "${local.name}-bastion-ec2",
+				   config_map_aws_auth = "${local.config_map_aws_auth}",
+				   kubeconfig          = "${local.kubeconfig}"
+				  })}"
   user_data_replace_on_change = true
 
   root_block_device {

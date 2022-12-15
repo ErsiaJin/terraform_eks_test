@@ -1,0 +1,21 @@
+#!/bin/bash
+echo "====server default setting===="
+hostname "${hostname}"
+yum update -y
+echo "====env setting===="
+mkdir -p "/root/eks_bin" && export "PATH=$PATH:/root/eks_bin" && echo 'export PATH=$PATH:/root/eks_bin' >> "/root/.bash_profile"
+echo "====install helm===="
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod 700 get_helm.sh && ./get_helm.sh && mv ./get_helm.sh "/root/eks_bin"
+helm repo add stable https://charts.helm.sh/stable && helm repo update
+echo "====install kubectl===="
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod 700 kubectl && mv ./kubectl "/root/eks_bin"
+echo "====install aws-iam-authenticator===="
+curl -Lo aws-iam-authenticator https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.5.9/aws-iam-authenticator_0.5.9_linux_amd64
+chmod +x ./aws-iam-authenticator && mv ./aws-iam-authenticator "/root/eks_bin/aws-iam-authenticator"
+echo "====kubectl configure===="
+mkdir -p "/root/.kube"
+echo "${kubeconfig}" > "/root/.kube/config"
+echo "${config_map_aws_auth}" > "/root/eks_bin/configmap.yml"
+kubectl apply -f "/root/eks_bin/configmap.yml"
