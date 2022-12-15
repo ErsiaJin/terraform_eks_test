@@ -1,0 +1,8 @@
+#!/bin/bash
+sudo yum update
+sudo yum install -y apache2
+sudo systemctl start apache2
+sudo systemctl enable apache2
+sudo sed -i 's/Listen 80/Listen ${server_port}/' /etc/apache2/ports.conf
+echo "Hello, Ersia. This is test HTTP WEB." | sudo tee /var/www/html/index.html
+sudo systemctl restart apache2
