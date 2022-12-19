@@ -40,15 +40,22 @@ echo "6.ingress-nginx install================="
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/aws/deploy.yaml
 kubectl get svc -n ingress-nginx
 echo "========================================"
-echo "7.docker install and image setting================="
+echo "7.docker install and image setting======"
 yum install docker -y
 systemctl enable docker
 systemctl start docker
 mkdir -p /root/flask_api_sample
-crul -Lo /root/flask_api_sample/app.py 
-crul -Lo /root/flask_api_sample/Dockerfile
-crul -Lo /root/flask_api_sample/requirements.txt
-
-docker build /root/flask_api_sample -t 411158671563.dkr.ecr.ap-northeast-2.amazonaws.com/dev-ihjin-ecr-repository
-docker push 411158671563.dkr.ecr.ap-northeast-2.amazonaws.com/dev-ihjin-ecr-repository
+curl -Lo /root/flask_api_sample/app.py https://raw.githubusercontent.com/ErsiaJin/terraform_eks_test/main/source_code/flask_api_sample/app.py
+curl -Lo /root/flask_api_sample/Dockerfile https://raw.githubusercontent.com/ErsiaJin/terraform_eks_test/main/source_code/flask_api_sample/Dockerfile
+curl -Lo /root/flask_api_sample/requirements.txt https://raw.githubusercontent.com/ErsiaJin/terraform_eks_test/main/source_code/flask_api_sample/requirements.txt
+docker build /root/flask_api_sample -t "${ecr_repository_url}"
+docker push "${ecr_repository_url}"
 docker rmi -f $(docker images -aq)
+echo "========================================"
+echo "8.start application service and add ingress rule======"
+curl -Lo /root/flask_api_sample/flask-app.yaml https://raw.githubusercontent.com/ErsiaJin/terraform_eks_test/main/source_code/flask_api_sample/flask-app.yaml
+sed -i "s/<ecr_repository_url>/${ecr_repository_url}/g" /root/flask_api_sample/flask-app.yaml
+kubectl apply -f /root/flask_api_sample/flask-app.yaml
+curl -Lo /root/flask_api_sample/micro-ingress.yaml https://raw.githubusercontent.com/ErsiaJin/terraform_eks_test/main/source_code/flask_api_sample/micro-ingress.yaml
+sed -i "s/<nlb_dns_name>/test.ersia.net/g" /root/flask_api_sample/micro-ingress.yaml
+kubectl apply -f /root/flask_api_sample/micro-ingress.yaml

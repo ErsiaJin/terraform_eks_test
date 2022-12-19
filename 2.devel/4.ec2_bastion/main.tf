@@ -23,11 +23,27 @@ data "terraform_remote_state" "eks" {
   }
 }
 
+data "terraform_remote_state" "erc" {
+  backend = "local"
+
+  config = {
+    path = "../3.eks/terraform.tfstate"
+  }
+}
+
+data "kubernetes_service" "ingress_nginx" {
+  metadata {
+    name = "ingress-nginx-controller"
+    namespace = "kube-system"
+  }
+}
+
 locals {
   mypc-external-cidr  = "${chomp(data.http.mypc-external-ip.response_body)}/32"
   public_subnet_id    = "${data.terraform_remote_state.environment.outputs.public_subnets[1]}"
   config_map_aws_auth = "${data.terraform_remote_state.eks.outputs.config_map_aws_auth}"
   kubeconfig          = "${data.terraform_remote_state.eks.outputs.kubeconfig}"
+  ecr_repository_url  = "${data.terraform_remote_state.ecr.outputs.ecr_repository_url}"
 }
 
 resource "aws_security_group" "bastion_security_group" {
@@ -69,7 +85,8 @@ resource "aws_instance" "bastion_ec2" {
 				   kubeconfig          = "${local.kubeconfig}",
 				   eks_iam_region      = "${var.region}",
 				   eks_iam_access_key  = "${var.eks_iam_access_key}",
-				   eks_iam_secret_key  = "${var.eks_iam_secret_key}"
+				   eks_iam_secret_key  = "${var.eks_iam_secret_key}",
+				   ecr_repository_url  = "${var.ecr_repository_url}"
 				  })}"
   user_data_replace_on_change = true
 
