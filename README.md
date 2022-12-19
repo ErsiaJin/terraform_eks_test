@@ -1,6 +1,7 @@
 # Terraform_eks_test
 기존에 제공하는 Terraform을 사용한 EKS 예시를 테스트해보고
-사용이 편리하게 혹은 요구사항에 맞게 Terraform 코드를 수정해보는 개인 프로젝트입니다.
+사용이 편리하게 혹은 요구사항에 맞게 Terraform 코드를 수정해보는 개인 프로젝트입니다.  
+
 
 
 ## 제약사항
@@ -13,7 +14,8 @@
     - kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/aws/deploy.yaml
 * 삭제 시 주의사항
   1. Terraform을 통해서 생성하지않은 AWS Resource에 대해서는 삭제를 보장하지 않습니다.
-    - 예시) ingress 용 ELB 등
+    - 예시) ingress 용 ELB 등  
+
 
 
 ## 사용을 위한 입력 변수
@@ -33,7 +35,6 @@
 3.ecr
   - docker image를 관리할 aws ecr을 생성합니다.
 
-
 4.ec2_bastion 생성 시 아래의 변수 입력이 필요합니다.
   - eks를 관리할 IAM 계정의 access key와 secret key를 입력해야 합니다.
      * 환경변수를 통해서도 terraform apply 전에 설정할 수 있습니다.
@@ -48,11 +49,11 @@
   - Bastion 서버의 AMI 타입은 Amazon Linux 2의 최신버전을 자동으로 선택합니다.
   - Bastion 서버에서 사용할 KeyPair 이름을 입력해야 합니다. (**해당 KeyPair는 사전에 미리 생성되어 있어야 합니다.)
   - Bastion 서버의 SSH 터미널 접속 Port를 입력해야 합니다. (**별도로 user data를 통해 별도로 ssh port를 변경하지 않았을 경우, 반드시 22번 포트로 사용해야 합니다.)
-```
+```  
 
 
-### 대략적인 구조
 
+## 대략적인 구조
 ``` explan architecture
 1.environment
   - vpc, subnet, route table과 같은 기본 환경을 구성합니다.
@@ -70,13 +71,15 @@
 	2) ingress-nginx NLB를 구성합니다.
 	3) docker image를 생성하고 ecr에 push합니다.
 	4) push한 image를 바탕으로 api 서비스 pod를 생성하고 ingress 중계규칙을 생성합니다.
-```
+```  
+
 
 
 ## 사용예시
 ``` use example
 사용 예시 설명 작성 필요~~
-```
+```  
+
 
 
 ## 참고사이트
@@ -88,4 +91,4 @@
 * KUBECONFIG 환경변수(https://nayoungs.tistory.com/entry/Kubernetes-Kubeconfig)
 * EKS Control Plain Logging(https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#enabling-control-plane-logging)
 * Amazon EKS 클러스터의 여러 Kubernetes 서비스에 대한 외부 액세스를 제공하려면 어떻게 해야 하나요?(https://aws.amazon.com/ko/premiumsupport/knowledge-center/eks-access-kubernetes-services/)
-* NGINX ingress controller(https://kubernetes.github.io/ingress-nginx/deploy/#network-load-balancer-nlb)
+* NGINX ingress controller(https://kubernetes.github.io/ingress-nginx/deploy/#network-load-balancer-nlb)  

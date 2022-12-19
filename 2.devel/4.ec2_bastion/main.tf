@@ -23,18 +23,11 @@ data "terraform_remote_state" "eks" {
   }
 }
 
-data "terraform_remote_state" "erc" {
+data "terraform_remote_state" "ecr" {
   backend = "local"
 
   config = {
-    path = "../3.eks/terraform.tfstate"
-  }
-}
-
-data "kubernetes_service" "ingress_nginx" {
-  metadata {
-    name = "ingress-nginx-controller"
-    namespace = "kube-system"
+    path = "../3.ecr/terraform.tfstate"
   }
 }
 
@@ -86,7 +79,7 @@ resource "aws_instance" "bastion_ec2" {
 				   eks_iam_region      = "${var.region}",
 				   eks_iam_access_key  = "${var.eks_iam_access_key}",
 				   eks_iam_secret_key  = "${var.eks_iam_secret_key}",
-				   ecr_repository_url  = "${var.ecr_repository_url}"
+				   ecr_repository_url  = "${local.ecr_repository_url}"
 				  })}"
   user_data_replace_on_change = true
 
