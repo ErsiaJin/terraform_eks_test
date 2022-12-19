@@ -83,12 +83,13 @@
 
 
 ## 참고사이트
-* VPC 모듈(https://github.com/terraform-aws-modules/terraform-aws-vpc)
-* Terraform EC2 AMI 불러오기(https://www.hashicorp.com/blog/hashicorp-terraform-supports-amazon-linux-2)
+* [VPC 모듈](https://github.com/terraform-aws-modules/terraform-aws-vpc)
+* [Terraform EC2 AMI 불러오기](https://www.hashicorp.com/blog/hashicorp-terraform-supports-amazon-linux-2)
 * [Terraform, Helm을 이용한 AWS EKS 구성](http://dveamer.github.io/backend/TerrafromAwsEks.html)
 * [Terraform | EKS 만들어 보기](https://no-easy-dev.tistory.com/39)
 * [Amazon EKS 컨트롤 영역 로깅](https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/control-plane-logs.html)
-* KUBECONFIG 환경변수(https://nayoungs.tistory.com/entry/Kubernetes-Kubeconfig)
-* EKS Control Plain Logging(https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#enabling-control-plane-logging)
-* Amazon EKS 클러스터의 여러 Kubernetes 서비스에 대한 외부 액세스를 제공하려면 어떻게 해야 하나요?(https://aws.amazon.com/ko/premiumsupport/knowledge-center/eks-access-kubernetes-services/)
-* NGINX ingress controller(https://kubernetes.github.io/ingress-nginx/deploy/#network-load-balancer-nlb)  
+* [KUBECONFIG 환경변수](https://nayoungs.tistory.com/entry/Kubernetes-Kubeconfig)
+* [EKS Control Plain Logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#enabling-control-plane-logging)
+* [Amazon EKS 클러스터의 여러 Kubernetes 서비스에 대한 외부 액세스를 제공하려면 어떻게 해야 하나요?](https://aws.amazon.com/ko/premiumsupport/knowledge-center/eks-access-kubernetes-services/)
+* [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/deploy/#network-load-balancer-nlb)
+* [[NBP] Python Flask API docker image build](https://do-hansung.tistory.com/48)
