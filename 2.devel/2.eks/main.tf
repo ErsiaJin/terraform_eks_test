@@ -5,7 +5,7 @@
 #  * EKS Cluster
 #
 provider "aws" {
-  region = local.region
+  region = var.region
 }
 
 data "http" "mypc-external-ip" {
@@ -21,15 +21,13 @@ data "terraform_remote_state" "environment" {
 }
 
 locals {
-  name               = "dev-ihjin"
-  region             = "ap-northeast-2"
   vpc_id             = "${data.terraform_remote_state.environment.outputs.vpc_id}"
   private_subnet_ids = "${data.terraform_remote_state.environment.outputs.private_subnets[*]}"
   bastion_cidr       = "${data.terraform_remote_state.environment.outputs.public_subnets_cidr_blocks[1]}"
 }
 
 resource "aws_iam_role" "eks_cluster_iam_role" {
-  name = "${local.name}-eks-cluster-iam-role"
+  name = "${var.symbol_name}-eks-cluster-iam-role"
 
   assume_role_policy = <<POLICY
 {
@@ -58,7 +56,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_iam_role_AmazonEKSVPCReso
 }
 
 resource "aws_security_group" "eks_cluster_security_group" {
-  name        = "${local.name}-eks-cluster-security-group"
+  name        = "${var.symbol_name}-eks-cluster-security-group"
   description = "Cluster communication with worker nodes"
   vpc_id      = "${local.vpc_id}"
 
@@ -69,9 +67,12 @@ resource "aws_security_group" "eks_cluster_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "${local.name}-eks-cluster-security-group"
-  }
+  tags = merge(
+    var.default_tags,
+    {
+      Name = "${var.symbol_name}-eks-cluster-security-group"
+    }
+  )
 }
 
 resource "aws_security_group_rule" "eks_cluster_security_group_rule" {
@@ -85,7 +86,7 @@ resource "aws_security_group_rule" "eks_cluster_security_group_rule" {
 }
 
 resource "aws_eks_cluster" "eks_cluster" {
-  name     = "${local.name}-eks-cluster"
+  name     = "${var.symbol_name}-eks-cluster"
   role_arn = aws_iam_role.eks_cluster_iam_role.arn
 
   vpc_config {
@@ -93,10 +94,19 @@ resource "aws_eks_cluster" "eks_cluster" {
     subnet_ids         = "${local.private_subnet_ids[*]}"
   }
 
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_iam_role_AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.eks_cluster_iam_role_AmazonEKSVPCResourceController,
+    aws_iam_role_policy_attachment.eks_cluster_iam_role_AmazonEKSVPCResourceController
   ]
+  
+  tags = merge(
+    var.default_tags,
+    {
+      Name = "${var.symbol_name}-eks-cluster"
+    }
+  )
 }
 
 #
@@ -105,7 +115,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 #  * EKS Node Group to launch worker nodes
 #
 resource "aws_iam_role" "eks_node_iam_role" {
-  name = "${local.name}-eks-node-iam-role"
+  name = "${var.symbol_name}-eks-node-iam-role"
 
   assume_role_policy = <<POLICY
 {
@@ -138,9 +148,14 @@ resource "aws_iam_role_policy_attachment" "eks_node_iam_role_AmazonEC2ContainerR
   role       = aws_iam_role.eks_node_iam_role.name
 }
 
+resource "aws_iam_role_policy_attachment" "eks_node_iam_role_AmazonEC2RoleforSSM" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+  role       = aws_iam_role.eks_node_iam_role.name
+}
+
 resource "aws_eks_node_group" "eks_node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = "eks_node_group"
+  node_group_name = "${var.symbol_name}-eks_node_group"
   node_role_arn   = aws_iam_role.eks_node_iam_role.arn
   subnet_ids      = "${local.private_subnet_ids[*]}"
   
@@ -159,5 +174,13 @@ resource "aws_eks_node_group" "eks_node_group" {
     aws_iam_role_policy_attachment.eks_node_iam_role_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.eks_node_iam_role_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.eks_node_iam_role_AmazonEC2ContainerRegistryReadOnly,
+	aws_iam_role_policy_attachment.eks_node_iam_role_AmazonEC2RoleforSSM
   ]
+  
+  tags = merge(
+    var.default_tags,
+    {
+      Name = "${var.symbol_name}-eks_node_group"
+    }
+  )
 }

@@ -1,5 +1,5 @@
 provider "aws" {
-  region = local.region
+  region = var.region
 }
 
 data "http" "mypc-external-ip" {
@@ -24,8 +24,6 @@ data "terraform_remote_state" "eks" {
 }
 
 locals {
-  name                = "dev-ihjin"
-  region              = "ap-northeast-2"
   mypc-external-cidr  = "${chomp(data.http.mypc-external-ip.response_body)}/32"
   public_subnet_id    = "${data.terraform_remote_state.environment.outputs.public_subnets[1]}"
   config_map_aws_auth = "${data.terraform_remote_state.eks.outputs.config_map_aws_auth}"
@@ -33,7 +31,7 @@ locals {
 }
 
 resource "aws_security_group" "bastion_security_group" {
-  name          = "${local.name}-bastion-ec2-sg"
+  name          = "${var.symbol_name}-bastion-ec2-sg"
   vpc_id        = "${data.terraform_remote_state.environment.outputs.vpc_id}"
 
   ingress {
@@ -48,10 +46,13 @@ resource "aws_security_group" "bastion_security_group" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
-  tags = {
-    Name = "${local.name}-bastion-ec2-sg"
-  }
+
+  tags = merge(
+    var.default_tags,
+    {
+      Name  = "${var.symbol_name}-bastion-ec2-sg"
+    }
+  )
 }
 
 resource "aws_instance" "bastion_ec2" {
@@ -62,10 +63,13 @@ resource "aws_instance" "bastion_ec2" {
   key_name                = "${var.bastion_key_name}"
   disable_api_termination = false
 
-  user_data = "${templatefile("userdata-eks.tftpl", 
-                  {hostname            = "${local.name}-bastion-ec2",
+  user_data = "${templatefile("userdata-bastion.tftpl", 
+                  {hostname            = "${var.symbol_name}-bastion-ec2",
 				   config_map_aws_auth = "${local.config_map_aws_auth}",
-				   kubeconfig          = "${local.kubeconfig}"
+				   kubeconfig          = "${local.kubeconfig}",
+				   eks_iam_region      = "${var.region}",
+				   eks_iam_access_key  = "${var.eks_iam_access_key}",
+				   eks_iam_secret_key  = "${var.eks_iam_secret_key}"
 				  })}"
   user_data_replace_on_change = true
 
@@ -74,19 +78,22 @@ resource "aws_instance" "bastion_ec2" {
     volume_type = "gp3"
     delete_on_termination = true
     tags = {
-      Name = "${local.name}-bastion-ec2:/root"
+      Name = "${var.symbol_name}-bastion-ec2:/root"
     }
   }
 
-  tags = {
-    Name = "${local.name}-bastion-ec2"
-  }
+  tags = merge(
+    var.default_tags,
+    {
+      Name  = "${var.symbol_name}-bastion-ec2"
+    }
+  )
 }
 
 resource "aws_eip" "bastion_eip" {
   instance = "${aws_instance.bastion_ec2.id}"
   vpc      = true
   tags = {
-    Name = "${local.name}-bastion-eip"
+    Name = "${var.symbol_name}-bastion-eip"
   }
 }

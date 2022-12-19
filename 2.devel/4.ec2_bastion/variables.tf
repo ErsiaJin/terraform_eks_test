@@ -1,3 +1,35 @@
+variable "default_tags" {
+  description = "The Map of tags"
+  default = {
+    Project     = "dev-ihjin"
+	Owner       = "ihjin"
+    Environment = "development"
+    Terraform   = "true"
+  }
+}
+
+variable "symbol_name" {
+  description = "The string of project symbol_name"
+  type        = string
+  default     = "dev-ihjin"
+}
+
+variable "region" {
+  description = "The string of project region"
+  type        = string
+  default     = "ap-northeast-2"
+}
+
+variable "eks_iam_access_key" {
+  description = "The eks iam access key"
+  type        = string
+}
+
+variable "eks_iam_secret_key" {
+  description = "The eks iam secret key"
+  type        = string
+}
+
 data "aws_ami" "bastion_ami" {
  most_recent = true
 
