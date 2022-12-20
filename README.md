@@ -1,7 +1,9 @@
 Terraform_EKS_Test
 ==================
 > Terraform을 사용한 EKS 예시를 테스트해보고
-> 사용이 편리하게 혹은 요구사항에 맞게 Terraform 코드를 수정해보는 개인 프로젝트입니다.   
+> 사용이 편리하게 혹은 요구사항에 맞게 Terraform 코드를 수정해보는 개인 프로젝트입니다.
+![구성도](https://github.com/ErsiaJin/terraform_eks_test/raw/main/sample_image/Terraform_EKS_test_project_architecture.png)
+   
 ****
 ## 1.제약사항
 * 1,2,3,4의 순서대로 terraform init&apply가 수행되어야 합니다.   
@@ -143,12 +145,16 @@ c:\terraform_study\git_repository\terraform_eks_test\2.devel\4.ec2_bastion>terra
 c:\terraform_study\git_repository\terraform_eks_test\2.devel\4.ec2_bastion>terraform apply --auto-approve
 ```   
 #### 4-3-5. API 서비스 호출 확인
-웹브라우저에 아래의 주소로 접속 및 결과값 확인 (NLB Provisioning 시간이 필요하므로 약 2~3분 가량 후에 접속 시도)
-	> * http://<NLB_DNS>/ihjin   
-	    예시) http://a5ec3c8c22ef94d088b4212a9c4ab302-a93c9d9b662f41b7.elb.ap-northeast-2.amazonaws.com/ihjin
-		
-	> * http://<NLB_DNS>/ihjin?myname=<임의의 값>&message=<임의의 값>
-	    예시) http://a5ec3c8c22ef94d088b4212a9c4ab302-a93c9d9b662f41b7.elb.ap-northeast-2.amazonaws.com/ihjin?myname=ihjin&message=hello
+웹브라우저에 아래의 주소로 접속 및 결과값 확인   
+(NLB Provisioning 시간이 필요하므로 약 2~3분 가량 후에 접속 시도)   
+* http://<NLB_DNS>/ihjin   
+	> URL 예시) http://a5ec3c8c22ef94d088b4212a9c4ab302-a93c9d9b662f41b7.elb.ap-northeast-2.amazonaws.com/ihjin   
+	> 결과 예시)
+	![결과예시1](https://github.com/ErsiaJin/terraform_eks_test/raw/main/sample_image/call_example_1.png)
+* http://<NLB_DNS>/ihjin?myname=<임의의 값>&message=<임의의 값>
+	> URL 예시) http://a5ec3c8c22ef94d088b4212a9c4ab302-a93c9d9b662f41b7.elb.ap-northeast-2.amazonaws.com/ihjin?myname=ihjin&message=hello   
+	> 결과 예시)
+	![결과예시2](https://github.com/ErsiaJin/terraform_eks_test/raw/main/sample_image/call_example_2.png)
   
    
 &nbsp; 
