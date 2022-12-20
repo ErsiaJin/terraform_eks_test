@@ -25,22 +25,23 @@ echo "========================================"
 echo "4.install kubectl======================="
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod 700 kubectl && mv ./kubectl "/root/eks_bin"
-echo "====install aws-iam-authenticator===="
+echo "========================================"
+echo "5.install aws-iam-authenticator========="
 curl -Lo aws-iam-authenticator https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.5.9/aws-iam-authenticator_0.5.9_linux_amd64
 chmod +x ./aws-iam-authenticator && mv ./aws-iam-authenticator "/root/eks_bin/aws-iam-authenticator"
 echo "========================================"
-echo "5.kubectl configure====================="
+echo "6.kubectl configure====================="
 mkdir -p "/root/.kube"
 echo "${kubeconfig}" > "/root/.kube/config"
 export "KUBECONFIG=$KUBECONFIG:/root/.kube/config" && echo "export KUBECONFIG=$KUBECONFIG:/root/.kube/config" >> "/root/.bash_profile"
 echo "${config_map_aws_auth}" > "/root/eks_bin/configmap.yml"
 kubectl apply -f "/root/eks_bin/configmap.yml"
 echo "========================================"
-echo "6.ingress-nginx install================="
+echo "7.ingress-nginx install================="
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/aws/deploy.yaml
 kubectl get svc -n ingress-nginx
 echo "========================================"
-echo "7.docker install and image setting======"
+echo "8.docker install and image setting======"
 yum install docker -y
 systemctl enable docker
 systemctl start docker
@@ -53,7 +54,7 @@ docker build /root/flask_api_sample -t "${ecr_repository_url}"
 docker push "${ecr_repository_url}"
 docker rmi -f $(docker images -aq)
 echo "========================================"
-echo "8.start application service and add ingress rule======"
+echo "9.start application service and add ingress rule======"
 curl -Lo /root/flask_api_sample/flask-app.yaml https://raw.githubusercontent.com/ErsiaJin/terraform_eks_test/main/source_code/flask_api_sample/flask-app.yaml
 sed -i "s=<ecr_repository_url>=${ecr_repository_url}=g" /root/flask_api_sample/flask-app.yaml
 kubectl apply -f /root/flask_api_sample/flask-app.yaml

@@ -50,17 +50,17 @@ variable "bastion_instance_type" {
   default     = "t3.micro"
 }
 
+variable "bastion_volume_size" {
+  description = "The name of the ec2 bastion_volume_size"
+  type        = number
+  default     = 10
+}
+
 # 주의!! Key가 사전에 만들어져 있어야 함
 variable "bastion_key_name" {
   description = "The name of the ec2 bastion_key_name"
   type        = string
   default     = "Ersia"
-}
-
-variable "bastion_volume_size" {
-  description = "The name of the ec2 bastion_volume_size"
-  type        = number
-  default     = 10
 }
 
 variable "ssh_server_port" {
