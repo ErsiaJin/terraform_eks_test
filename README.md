@@ -19,7 +19,7 @@ Terraform_EKS_Test
 * Terraform destroy 수행 시 주의사항
 	> 1. Terraform을 통해서 생성하지않은 AWS Resource에 대해서는 삭제를 보장하지 않습니다.   
 	     따라서 destroy 수행 전 수동으로 삭제 후 Terraform destroy를 수행해야 합니다.
-	> 	* 예시) Ingress 용 ELB 등   
+	> 	* 예시) Ingress 용 ELB, ECR Image 등   
    
 &nbsp;    
 ## 2.각 폴더 별 역할
@@ -98,10 +98,58 @@ Terraform_EKS_Test
 	> **userdata-bastion.tftpl파일을 수정해서 별도로 ssh port를 변경하지 않았다면, 반드시 22번 포트로 사용해야 합니다.**   
    
 &nbsp;  
-## 4.사용예시
-```
+## 4.사용예시 (Windows 환경)
+사전에 AWS CLI, Git, 그리고 Terraform 설치가 되어있어야 합니다.   
 
-```  
+### 4-1. git clone을 통한 코드 다운로드
+```
+git clone https://github.com/ErsiaJin/terraform_eks_test.git
+```   
+
+### 4-2. AWS Configure 수행
+```
+c:\terraform_study\git_repository>aws configure
+AWS Access Key ID [None]: ********************
+AWS Secret Access Key [None]: ***************************************
+Default region name [None]: ap-northeast-2
+Default output format [None]:
+```   
+
+### 4-3. 폴더로 이동 후 구성 진행
+#### 4-3-1. VPC등 환경 구성
+```
+c:\terraform_study\git_repository>cd terraform_eks_test\2.devel\1.environment
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\1.environment>terraform init & terraform plan
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\1.environment>terraform apply --auto-approve
+```
+#### 4-3-2. EKS 및 EKS Node Group 구성
+```
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\1.environment>cd ..\2.eks
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\2.eks>terraform init & terraform plan
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\2.eks>terraform apply --auto-approve
+```
+#### 4-3-3. ECR 구성
+```
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\2.eks>cd ..\3.ecr
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\3.ecr>terraform init & terraform plan
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\3.ecr>terraform apply --auto-approve
+```   
+#### 4-3-4. EC2 Bastion 구성 및 API 서비스 구성
+```
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\3.ecr>cd ..\4.ec2_bastion
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\4.ec2_bastion>set TF_VAR_eks_iam_access_key="********************"
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\4.ec2_bastion>set TF_VAR_eks_iam_secret_key****************************************
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\4.ec2_bastion>terraform init & terraform plan
+c:\terraform_study\git_repository\terraform_eks_test\2.devel\4.ec2_bastion>terraform apply --auto-approve
+```   
+#### 4-3-5. API 서비스 호출 확인
+웹브라우저에 아래의 주소로 접속 및 결과값 확인 (NLB Provisioning 시간이 필요하므로 약 2~3분 가량 후에 접속 시도)
+	> * http://<NLB_DNS>/ihjin   
+	    예시) http://a5ec3c8c22ef94d088b4212a9c4ab302-a93c9d9b662f41b7.elb.ap-northeast-2.amazonaws.com/ihjin
+		
+	> * http://<NLB_DNS>/ihjin?myname=<임의의 값>&message=<임의의 값>
+	    예시) http://a5ec3c8c22ef94d088b4212a9c4ab302-a93c9d9b662f41b7.elb.ap-northeast-2.amazonaws.com/ihjin?myname=ihjin&message=hello
+  
    
 &nbsp; 
 ## 5.참고사이트

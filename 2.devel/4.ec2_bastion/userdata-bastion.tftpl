@@ -59,5 +59,6 @@ curl -Lo /root/flask_api_sample/flask-app.yaml https://raw.githubusercontent.com
 sed -i "s=<ecr_repository_url>=${ecr_repository_url}=g" /root/flask_api_sample/flask-app.yaml
 kubectl apply -f /root/flask_api_sample/flask-app.yaml
 curl -Lo /root/flask_api_sample/micro-ingress.yaml https://raw.githubusercontent.com/ErsiaJin/terraform_eks_test/main/source_code/flask_api_sample/micro-ingress.yaml
-sed -i "s=<nlb_dns_name>=test.ersia.net=g" /root/flask_api_sample/micro-ingress.yaml
+NLB_DNS=`kubectl get svc -n ingress-nginx | grep -i "LoadBalancer" | awk '{print $4}'`
+sed -i "s=<nlb_dns_name>=$NLB_DNS=g" /root/flask_api_sample/micro-ingress.yaml
 kubectl apply -f /root/flask_api_sample/micro-ingress.yaml
